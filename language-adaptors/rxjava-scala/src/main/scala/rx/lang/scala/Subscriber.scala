@@ -34,7 +34,7 @@ trait Subscriber[-T] extends Observer[T] with Subscription {
   }
 
   override final def isUnsubscribed: Boolean = {
-    asJavaSubscriber.isUnsubscribed()
+    asJavaSubscriber.isUnsubscribed
   }
 
 }

@@ -99,7 +99,7 @@ trait Worker extends Subscription {
    * @return a subscription to be able to unsubscribe the action
    */
   def scheduleRec(action: => Unit): Subscription = {
-    def work: Unit = {
+    def work(): Unit = {
       action
       if (!this.isUnsubscribed) {
         this.schedule(work)

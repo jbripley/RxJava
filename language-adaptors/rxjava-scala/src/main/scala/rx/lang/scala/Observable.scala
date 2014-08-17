@@ -1627,9 +1627,9 @@ trait Observable[+T]
    * @param initialValue the initial value to be emitted by the resulting Observable
    * @return a `ConnectableObservable` that shares a single subscription to the underlying Observable and starts with `initialValue`
    */
-  def publish[T](initialValue: T): ConnectableObservable[T] = {
-    val thisJava = this.asJavaObservable.asInstanceOf[rx.Observable[T]]
-    new ConnectableObservable[T](thisJava.publish(initialValue))
+  def publish[R](initialValue: R): ConnectableObservable[R] = {
+    val thisJava = this.asJavaObservable.asInstanceOf[rx.Observable[R]]
+    new ConnectableObservable[R](thisJava.publish(initialValue))
   }
 
   /**
@@ -2927,7 +2927,7 @@ trait Observable[+T]
           subscriber,
           (v: T) => if(isFirst) isFirst = false else subscriber.onNext(v),
           e => subscriber.onError(e),
-          () => if(isFirst) subscriber.onError(new UnsupportedOperationException("tail of empty Observable")) else subscriber.onCompleted
+          () => if(isFirst) subscriber.onError(new UnsupportedOperationException("tail of empty Observable")) else subscriber.onCompleted()
         )
       }
     }
@@ -3502,7 +3502,7 @@ trait Observable[+T]
     *                 emits no elements, and `false` otherwise.
     */
   def isEmpty: Observable[Boolean] = {
-    toScalaObservable[java.lang.Boolean](asJavaObservable.isEmpty()).map(_.booleanValue())
+    toScalaObservable[java.lang.Boolean](asJavaObservable.isEmpty).map(_.booleanValue())
   }
 
   def withFilter(p: T => Boolean): WithFilter[T] = {
@@ -3913,7 +3913,7 @@ trait Observable[+T]
    * @return an Observable that emits a single item: the source Observable
    */
   def nest: Observable[Observable[T]] = {
-    toScalaObservable(asJavaObservable.nest).map(toScalaObservable[T](_))
+    toScalaObservable(asJavaObservable.nest).map(toScalaObservable[T])
   }
 
   /**
@@ -4079,7 +4079,7 @@ trait Observable[+T]
           },
           e => subscriber.onError(e),
           () => {
-            subscriber.onNext(b.result)
+            subscriber.onNext(b.result())
             subscriber.onCompleted()
           }
         )
@@ -4249,7 +4249,6 @@ trait Observable[+T]
  */
 object Observable {
   import scala.collection.JavaConverters._
-  import scala.collection.immutable.Range
   import scala.concurrent.duration.Duration
   import scala.concurrent.{Future, ExecutionContext}
   import scala.util.{Success, Failure}
@@ -4692,7 +4691,7 @@ object Observable {
    */
   def using[T, Resource <: Subscription](resourceFactory: () => Resource, observableFactory: Resource => Observable[T]): Observable[T] = {
     class ResourceSubscription(val resource: Resource) extends rx.Subscription {
-      def unsubscribe = resource.unsubscribe
+      def unsubscribe() = resource.unsubscribe()
 
       def isUnsubscribed: Boolean = resource.isUnsubscribed
     }

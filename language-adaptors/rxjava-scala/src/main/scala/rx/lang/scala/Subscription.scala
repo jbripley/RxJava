@@ -44,7 +44,7 @@ trait Subscription {
   private [scala] val unsubscribed = new AtomicBoolean(false)
   private [scala] val asJavaSubscription: rx.Subscription = new rx.Subscription {
     override def unsubscribe() { unsubscribed.compareAndSet(false, true) }
-    override def isUnsubscribed(): Boolean = { unsubscribed.get() }
+    override def isUnsubscribed: Boolean = { unsubscribed.get() }
   }
 
 
@@ -72,7 +72,7 @@ object Subscription {
       case x: rx.subscriptions.CompositeSubscription => new rx.lang.scala.subscriptions.CompositeSubscription(x)
       case x: rx.subscriptions.MultipleAssignmentSubscription => new rx.lang.scala.subscriptions.MultipleAssignmentSubscription(x)
       case x: rx.subscriptions.SerialSubscription => new rx.lang.scala.subscriptions.SerialSubscription(x)
-      case x: rx.Subscription => apply{ x.unsubscribe }
+      case x: rx.Subscription => apply{ x.unsubscribe() }
     }
   }
 
@@ -82,7 +82,7 @@ object Subscription {
   def apply(u: => Unit): Subscription = new Subscription() {
     override val asJavaSubscription = new rx.Subscription {
       override def unsubscribe() { if(unsubscribed.compareAndSet(false, true)) { u } }
-      override def isUnsubscribed(): Boolean = { unsubscribed.get() }
+      override def isUnsubscribed: Boolean = { unsubscribed.get() }
     }
   }
 
